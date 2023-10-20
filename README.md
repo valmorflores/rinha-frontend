@@ -1,7 +1,7 @@
 # rinha-frontend
 Rinha frontend
 
-# Endereço de teste
+# Deploy
 https://valmorflores.github.io/rinha-frontend/
 
 # Etapas
