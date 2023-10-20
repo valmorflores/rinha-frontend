@@ -1,0 +1,252 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+
+    <meta charset="UTF-8"> 
+    <style>
+
+        #formBox {
+            display: block;
+        }
+
+        #container {
+            height: 100vh;
+            overflow-y: auto;
+        }
+
+        body {
+            overflow: hidden; 
+        }
+    </style>
+  
+    <title>Carregar e Ler Arquivo JSON</title>
+</head>
+
+<body>
+    
+    <div id="formbox">
+        <input type="file" id="fileInput" accept=".json">
+        <pre id="jsonOutput"><div></div></pre>
+    </div>
+    <div id="container">
+        <ul id="recordList">
+            <!-- Records -->
+        </ul>
+    </div>
+    
+
+    <script>
+
+        console.log('Starting load information...');
+        const formBox = document.getElementById('formbox');
+        formBox.style.display = "block";
+        console.log('Display setup...');
+              
+       function ocultarFormBox() {
+             const formBox = document.getElementById('formbox');
+            formBox.style.display = "none";
+        }
+
+        function ocultarBtn() {
+            const formBtn = document.getElementById('formbtn');
+            formBtn.style.display = "none";
+        }
+
+       function startShowRecords() {
+         ocultarBtn();
+         showRecords();
+       }
+
+       const recordList = document.getElementById('recordList');
+        let records = []; // Array com 1.000.000 de registros
+        let recordsToShow = 2; // Quantidade de registros para mostrar a cada rolagem
+        let currentIndex = 0;
+    
+        function loadRecords(dataStr) {
+            records = dataStr;
+            console.log(records.length);
+            
+            showRecords();
+        }
+
+        // Função para exibir os registros
+        function showRecords() {
+            if (records.length <= 0) { 
+                console.log('Nenhum registro');
+                return 
+            }
+          console.log(records.length);
+          // Limpa os registros anteriores
+          recordList.innerHTML = '';
+    
+          for (let i = currentIndex; i < currentIndex + recordsToShow; i++) {
+            if (i >= records.length) {
+              // Todos os registros foram exibidos
+              return;
+            }
+    
+            const record = records[i];
+            const listItem = document.createElement('pre');
+            jsonStringFormatado = JSON.stringify(records[i], null, 2);
+            listItem.textContent = record;
+            recordList.appendChild(listItem);
+          }
+    
+          if (currentIndex < (records.length-recordsToShow)){
+             currentIndex += recordsToShow;
+          }
+          console.log('Current records: ' + currentIndex.toString());
+        }
+    
+        // Evento de rolagem
+        const container = document.getElementById('container');
+    
+        // Inicialmente, mostre os primeiros registros
+        //showRecords();
+
+
+
+
+        
+        // Função para lidar com a seleção do arquivo
+        document.getElementById('fileInput').addEventListener('change', function (event) {
+            const file = event.target.files[0];
+            let i = 0;
+                        
+            if (file) {
+                console.log("Starting App...");
+
+                const rangeSize = 1048576; //1048576=1mb //8192;
+
+                let offset = 0;
+                dataStr = [];
+
+                function readNextRange() {
+                    const reader = new FileReader();
+
+                    reader.onload = function (event) {
+                        const data = event.target.result;
+                        const displayArea = document.getElementById('jsonOutput');
+                        const chunkDisplay = document.createElement('div');
+                        chunkDisplay.textContent = `Parte de ${offset} ate ${offset + data.byteLength} bytes:`;
+                        //displayArea.appendChild(chunkDisplay);
+                        
+                        displayArea.appendChild(chunkDisplay);
+
+                        const textChunk = document.createElement('p');
+                        textChunk.textContent = new TextDecoder().decode(data);
+                        //console.log(textChunk);
+                        dataStr.push(textChunk.textContent);
+                        if (dataStr.length == 1){
+                            loadRecords(dataStr);
+                        }
+                        //não suportado, tamanho grande demais. Suporte indexedDB = 10MB
+                        //adicionarString(dataStr[i]);
+                        //não suportado: 
+                        //localStorage.setItem("data-" + offset + "-" + data.byteLength, dataStr);
+                        
+                        offset += data.byteLength;
+
+                        if (offset < file.size) {
+                            readNextRange();
+                        }
+                    };
+
+
+                    const blob = file.slice(offset, offset + rangeSize);
+                    reader.readAsArrayBuffer(blob);
+                }
+
+                readNextRange();
+            }
+            console.log("End App.");
+            console.log(dataStr);
+            loadRecords(dataStr);
+            ocultarFormBox();
+
+            // Setup container
+            container.addEventListener('scroll', function () {
+                const {
+                    scrollTop,
+                    scrollHeight,
+                    clientHeight
+                } = document.documentElement;
+
+                if (scrollTop + clientHeight >= scrollHeight - 5){
+                    console.log( 'Scroll top = ' + scrollTop.toString + ',' + 
+                                  'clientHeight=' + clientHeight.toString() + ', '  + 
+                                  'scrollHeight-5='  + (scrollHeight - 5).toString());
+                }
+            
+                if (container.scrollTop === 0) {
+                    console.log("Pra cima?" + currentIndex.toString());
+                    // Rolar para cima
+                    if (currentIndex > recordsToShow) {
+                        currentIndex -= (recordsToShow * 2 );
+                        if (currentIndex < 0) {
+                            currentIndex = 0;
+                        }
+                        showRecords();
+                    }
+                } else if (container.scrollTop + container.clientHeight >= container.scrollHeight) {
+                    
+                    showRecords();
+                }
+            });
+
+
+            document.addEventListener('keydown', function(event) {
+                
+                if (event.key === 'End') {
+                    // Verifica se a tecla 'Ctrl' está pressionada
+                    if (event.ctrlKey) {
+                        toEnd();
+                    }
+                }
+                if (event.key === 'Home') {
+                    // Verifica se a tecla 'Ctrl' está pressionada
+                    if (event.ctrlKey) {
+                        toHome();
+                    }
+                }
+                if (event.key === 'PageUp') {                   
+                    toPageUp();
+                }
+            });
+
+            function toEnd() {
+                // Coloque o código que você deseja executar aqui
+                console.log('Ctrl+End foi pressionado!');
+                currentIndex = records.length - recordsToShow;
+                showRecords();
+                // to endpage
+                var heightPage = document.body.scrollHeight; 
+                window.scrollTo(0, heightPage); 
+            }
+
+            function toHome() {
+                // Coloque o código que você deseja executar aqui
+                console.log('Ctrl+Home foi pressionado!');
+                currentIndex = 0;
+                showRecords();
+                window.scrollTo(0, 0); 
+            }
+
+
+            function toPageUp() {
+                if (currentIndex > recordsToShow) {
+                    currentIndex -= (recordsToShow * 2 );
+                    if (currentIndex < 0) {
+                        currentIndex = 0;
+                    }
+                    showRecords();
+                }
+            }
+    
+        });
+
+    </script>
+</body>
+
+</html>
