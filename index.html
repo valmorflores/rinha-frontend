@@ -3,9 +3,15 @@
 
 <head>
 
-    <meta charset="UTF-8"> 
-    <style>
+    <meta charset="UTF-8">
 
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400&display=swap" rel="stylesheet">
+
+
+    <style>
         #formBox {
             display: block;
         }
@@ -16,7 +22,60 @@
         }
 
         body {
-            overflow: hidden; 
+            overflow: hidden;
+        }
+
+        #font1 {
+            font-family: Inter;
+            font-size: 48px;
+            font-weight: 700;
+            line-height: 58px;
+            letter-spacing: 0em;
+            text-align: center;
+        }
+
+        #font2 {
+            font-family: Inter;
+            font-size: 24px;
+            font-weight: 400;
+            line-height: 29px;
+            letter-spacing: 0em;
+            text-align: center;
+        }
+
+        #fontbody {
+            font-family: Inter;
+            font-size: 16px;
+            font-weight: 400;
+            line-height: 19px;
+            letter-spacing: 0em;
+            text-align: left;
+        }
+
+        #error {
+            display: none;
+            color: red;
+            font-family: Inter;
+            font-size: 16px;
+            font-weight: 400;
+            line-height: 19px;
+            letter-spacing: 0em;
+            text-align: center;
+        }
+
+        #accentText {
+            background: #4E9590;
+            font-family: Inter;
+            font-size: 16px;
+            font-weight: 400;
+            line-height: 19px;
+            letter-spacing: 0em;
+            text-align: left;
+        }
+
+
+        #btn {
+            align-items: center;
         }
     </style>
 
@@ -25,13 +84,29 @@
 </head>
 
 <body>
-    
+
+
+
+
     <div id="formbox">
-        <h1 class="text-3xl font-bold">Primeiros testes</h1>
-        <p>Nesta etapa é possível apenas abrir e navegar</p>
-        <p>Ctrl+Home</p>
-        <p>Ctrl+End</p>
-        <input type="file" id="fileInput" accept=".json">
+
+        <div class="mx-auto max-w-[40rem] lg:max-w-[50rem]">
+            <div class="flex justify-center space-x-4 pt-2" role="tablist" aria-orientation="horizontal">
+                <h1 class="text-3xl font-bold" id="font1">JSON Tree Viewer</h1>
+            </div>
+            <div class="mt-1">
+                <p id="font2">Simple JSON Viewer that runs completely on-client. No data exchange </p>
+            </div>
+            <div class="mt-3">
+                <center>
+                    <p><input type="file" id="fileInput" accept=".json"></p>
+                </center>
+            </div>
+            <div class="mt-3">
+                <p id="error">Invalid file. Please load a valid JSON file.</p>
+            </div>
+        </div>
+
         <pre id="jsonOutput"><div></div></pre>
     </div>
     <div id="container">
@@ -39,7 +114,7 @@
             <!-- Records -->
         </ul>
     </div>
-    
+
 
     <script>
 
@@ -47,9 +122,9 @@
         const formBox = document.getElementById('formbox');
         formBox.style.display = "block";
         console.log('Display setup...');
-              
-       function ocultarFormBox() {
-             const formBox = document.getElementById('formbox');
+
+        function ocultarFormBox() {
+            const formBox = document.getElementById('formbox');
             formBox.style.display = "none";
         }
 
@@ -58,67 +133,189 @@
             formBtn.style.display = "none";
         }
 
-       function startShowRecords() {
-         ocultarBtn();
-         showRecords();
-       }
+        function startShowRecords() {
+            ocultarBtn();
+            showRecords();
+        }
 
-       const recordList = document.getElementById('recordList');
+
+
+        function getLevels(json, nivelAtual = 1) {
+            if (typeof json === 'object') {
+                let niveis = [];
+                if (Array.isArray(json)) {
+                    for (let i = 0; i < json.length; i++) {
+                        let subNiveis = getLevels(json[i], nivelAtual + 1);
+                        subNiveis = subNiveis.map(subNivel => `[${i}]${subNivel}`);
+                        niveis = niveis.concat(subNiveis);
+                    }
+                } else {
+                    for (let chave in json) {
+                        let subNiveis = getLevels(json[chave], nivelAtual + 1);
+                        subNiveis = subNiveis.map(subNivel => `${chave}-${subNivel}`);
+                        niveis = niveis.concat(subNiveis);
+                    }
+                }
+                return niveis;
+            } else {
+                return [nivelAtual];
+            }
+        }
+
+
+
+
+
+        // BLOCO:0-0-256
+        function prepareDataMap(records) {
+
+            try {
+                // Get levels is possible? Do this;
+                data = JSON.parse(records[0]);
+                const niveis = getLevels(data);
+                for (let i = 0; i < niveis.length; i++) {
+                    console.log(`${i}\t${niveis[i]}`);
+                }
+                return
+            }
+            catch
+            {
+
+            }
+
+            level = 0;
+            console.log('Map **ini**');
+            dataMap = [];
+            console.log(records.length);
+            lStringStarted = false;
+            cKey = '';
+            for (let i = 0; i < records.length; i++) {
+                for (let j = 0; j < records[i].length; j++) {
+                    char = (records[i][j]);
+                    if (char == '\n') {
+                        char = '';
+                    }
+                    if (char == '{' && !lStringStarted) {
+                        ++level;
+                        dataMap.push(level + ':' + '{');
+                    }
+                    if (char == '[' && !lStringStarted) {
+                        ++level;
+                        dataMap.push(level + ':' + '[');
+                    }
+                    if (char == '"') {
+                        if (lStringStarted) {
+                            lStringStarted = false;
+                        } else {
+                            if (cKey == '') {
+                                cKey = records[i].substring(j + 1, 100);
+                                cKey = cKey.substring(0, cKey.indexOf('"'));
+                                dataMap.push('Key:' + cKey + ' in ' + level);
+                                j = j + cKey.length + 2;
+                            } else {
+                                // Located value, clear cKey
+                                cValue = records[i].substring(j + 1);
+                                cValue = cValue.substring(0, cValue.indexOf('"'));
+                                dataMap.push('Value:' + cValue);
+                                cKey = '';
+                                j = j + cValue.length + 2;
+                            }
+                        }
+                    } else if (char == '}' && !lStringStarted) {
+                        --level;
+                        dataMap.push(level);
+                    } else if (char == ']' && !lStringStarted) {
+                        --level;
+                        dataMap.push(level);
+                    } else {
+                        if (!lStringStarted) {
+                            if (cKey != '') {
+                                if (char == ' ') {
+                                } else {
+                                    cValue = records[i].substring(j);
+                                    cValue = cValue.substring(0, cValue.indexOf(','));
+                                    dataMap.push('Value:' + cValue);
+                                    cKey = '';
+                                    j = j + cValue.length;
+                                }
+                            }
+                        }
+                    }
+                }
+                //ElementMap(i,0,0,0,0,0,0));
+            }
+            console.log(dataMap);
+            console.log('Map.end **end**');
+        }
+
+        function ElementMap(id, order, beginbloc, begin, endbloc, end, levels) {
+            this.id = id;
+            this.order = order;
+            this.beginbloc = beginbloc;
+            this.begin = begin;
+            this.endbloc = endbloc;
+            this.end = end;
+        }
+
+
+
+        const recordList = document.getElementById('recordList');
         let records = []; // Array com 1.000.000 de registros
         let recordsToShow = 2; // Quantidade de registros para mostrar a cada rolagem
         let currentIndex = 0;
-    
+
         function loadRecords(dataStr) {
             records = dataStr;
             console.log(records.length);
-            
             showRecords();
+        }
+
+        // Display error function 
+        function displayError() {
+            const formError = document.getElementById('error');
+            formError.style.display = "block";
         }
 
         // Função para exibir os registros
         function showRecords() {
-            if (records.length <= 0) { 
+            if (records.length <= 0) {
                 console.log('Nenhum registro');
-                return 
+                return
             }
-          console.log(records.length);
-          // Limpa os registros anteriores
-          recordList.innerHTML = '';
-    
-          for (let i = currentIndex; i < currentIndex + recordsToShow; i++) {
-            if (i >= records.length) {
-              // Todos os registros foram exibidos
-              return;
+            console.log(records.length);
+            if (records.length > 0) {
+                prepareDataMap(dataStr);
             }
-    
-            const record = records[i];
-            const listItem = document.createElement('pre');
-            jsonStringFormatado = JSON.stringify(records[i], null, 2);
-            listItem.textContent = record;
-            recordList.appendChild(listItem);
-          }
-    
-          if (currentIndex < (records.length-recordsToShow)){
-             currentIndex += recordsToShow;
-          }
-          console.log('Current records: ' + currentIndex.toString());
+            // Limpa os registros anteriores
+            recordList.innerHTML = '';
+
+            for (let i = currentIndex; i < currentIndex + recordsToShow; i++) {
+                if (i >= records.length) {
+                    // Todos os registros foram exibidos
+                    return;
+                }
+
+                const record = records[i];
+                const listItem = document.createElement('pre');
+                jsonStringFormatado = JSON.stringify(records[i], null, 2);
+                listItem.textContent = record;
+                recordList.appendChild(listItem);
+            }
+
+            if (currentIndex < (records.length - recordsToShow)) {
+                currentIndex += recordsToShow;
+            }
+            console.log('Current records: ' + currentIndex.toString());
         }
-    
+
         // Evento de rolagem
         const container = document.getElementById('container');
-    
-        // Inicialmente, mostre os primeiros registros
-        //showRecords();
 
-
-
-
-        
         // Função para lidar com a seleção do arquivo
         document.getElementById('fileInput').addEventListener('change', function (event) {
             const file = event.target.files[0];
             let i = 0;
-                        
+
             if (file) {
                 console.log("Starting App...");
 
@@ -136,21 +333,21 @@
                         const chunkDisplay = document.createElement('div');
                         chunkDisplay.textContent = `Parte de ${offset} ate ${offset + data.byteLength} bytes:`;
                         //displayArea.appendChild(chunkDisplay);
-                        
+
                         displayArea.appendChild(chunkDisplay);
 
                         const textChunk = document.createElement('p');
                         textChunk.textContent = new TextDecoder().decode(data);
                         //console.log(textChunk);
                         dataStr.push(textChunk.textContent);
-                        if (dataStr.length == 1){
+                        if (dataStr.length == 1) {
                             loadRecords(dataStr);
                         }
                         //não suportado, tamanho grande demais. Suporte indexedDB = 10MB
                         //adicionarString(dataStr[i]);
                         //não suportado: 
                         //localStorage.setItem("data-" + offset + "-" + data.byteLength, dataStr);
-                        
+
                         offset += data.byteLength;
 
                         if (offset < file.size) {
@@ -170,6 +367,7 @@
             loadRecords(dataStr);
             ocultarFormBox();
 
+
             // Setup container
             container.addEventListener('scroll', function () {
                 const {
@@ -178,31 +376,31 @@
                     clientHeight
                 } = document.documentElement;
 
-                if (scrollTop + clientHeight >= scrollHeight - 5){
-                    console.log( 'Scroll top = ' + scrollTop.toString + ',' + 
-                                  'clientHeight=' + clientHeight.toString() + ', '  + 
-                                  'scrollHeight-5='  + (scrollHeight - 5).toString());
+                if (scrollTop + clientHeight >= scrollHeight - 5) {
+                    console.log('Scroll top = ' + scrollTop.toString + ',' +
+                        'clientHeight=' + clientHeight.toString() + ', ' +
+                        'scrollHeight-5=' + (scrollHeight - 5).toString());
                 }
-            
+
                 if (container.scrollTop === 0) {
                     console.log("Pra cima?" + currentIndex.toString());
                     // Rolar para cima
                     if (currentIndex > recordsToShow) {
-                        currentIndex -= (recordsToShow * 2 );
+                        currentIndex -= (recordsToShow * 2);
                         if (currentIndex < 0) {
                             currentIndex = 0;
                         }
                         showRecords();
                     }
                 } else if (container.scrollTop + container.clientHeight >= container.scrollHeight) {
-                    
+
                     showRecords();
                 }
             });
 
 
-            document.addEventListener('keydown', function(event) {
-                
+            document.addEventListener('keydown', function (event) {
+
                 if (event.key === 'End') {
                     // Verifica se a tecla 'Ctrl' está pressionada
                     if (event.ctrlKey) {
@@ -215,7 +413,7 @@
                         toHome();
                     }
                 }
-                if (event.key === 'PageUp') {                   
+                if (event.key === 'PageUp') {
                     toPageUp();
                 }
             });
@@ -226,8 +424,8 @@
                 currentIndex = records.length - recordsToShow;
                 showRecords();
                 // to endpage
-                var heightPage = document.body.scrollHeight; 
-                window.scrollTo(0, heightPage); 
+                var heightPage = document.body.scrollHeight;
+                window.scrollTo(0, heightPage);
             }
 
             function toHome() {
@@ -235,20 +433,20 @@
                 console.log('Ctrl+Home foi pressionado!');
                 currentIndex = 0;
                 showRecords();
-                window.scrollTo(0, 0); 
+                window.scrollTo(0, 0);
             }
 
 
             function toPageUp() {
                 if (currentIndex > recordsToShow) {
-                    currentIndex -= (recordsToShow * 2 );
+                    currentIndex -= (recordsToShow * 2);
                     if (currentIndex < 0) {
                         currentIndex = 0;
                     }
                     showRecords();
                 }
             }
-    
+
         });
 
     </script>
