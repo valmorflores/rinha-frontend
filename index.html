@@ -2,114 +2,41 @@
 <html>
 
 <head>
-
     <meta charset="UTF-8">
-
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@700&display=swap" rel="stylesheet">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400&display=swap" rel="stylesheet">
-
-
-    <style>
-        #formBox {
-            display: block;
-        }
-
-        #container {
-            height: 100vh;
-            overflow-y: auto;
-        }
-
-        body {
-            overflow: hidden;
-        }
-
-        #font1 {
-            font-family: Inter;
-            font-size: 48px;
-            font-weight: 700;
-            line-height: 58px;
-            letter-spacing: 0em;
-            text-align: center;
-        }
-
-        #font2 {
-            font-family: Inter;
-            font-size: 24px;
-            font-weight: 400;
-            line-height: 29px;
-            letter-spacing: 0em;
-            text-align: center;
-        }
-
-        #fontbody {
-            font-family: Inter;
-            font-size: 16px;
-            font-weight: 400;
-            line-height: 19px;
-            letter-spacing: 0em;
-            text-align: left;
-        }
-
-        #error {
-            display: none;
-            color: red;
-            font-family: Inter;
-            font-size: 16px;
-            font-weight: 400;
-            line-height: 19px;
-            letter-spacing: 0em;
-            text-align: center;
-        }
-
-        #accentText {
-            background: #4E9590;
-            font-family: Inter;
-            font-size: 16px;
-            font-weight: 400;
-            line-height: 19px;
-            letter-spacing: 0em;
-            text-align: left;
-        }
-
-
-        #btn {
-            align-items: center;
-        }
-    </style>
-
+    <link href="css/style.css" rel="stylesheet">
     <script src="https://cdn.tailwindcss.com"></script>
-    <title>Carregar e Ler Arquivo JSON</title>
+    <title>Read JSON files</title>
 </head>
 
 <body>
-
-
-
-
-    <div id="formbox">
-
-        <div class="mx-auto max-w-[40rem] lg:max-w-[50rem]">
-            <div class="flex justify-center space-x-4 pt-2" role="tablist" aria-orientation="horizontal">
-                <h1 class="text-3xl font-bold" id="font1">JSON Tree Viewer</h1>
-            </div>
-            <div class="mt-1">
-                <p id="font2">Simple JSON Viewer that runs completely on-client. No data exchange </p>
-            </div>
-            <div class="mt-3">
-                <center>
-                    <p><input type="file" id="fileInput" accept=".json"></p>
-                </center>
-            </div>
-            <div class="mt-3">
-                <p id="error">Invalid file. Please load a valid JSON file.</p>
-            </div>
+        <div id="formbox" class="main-content flex items-center">
+            <div style="margin-top: 200px;"></div>
+                <div class="flex justify-center space-x-4 pt-2" role="tablist" aria-orientation="horizontal">
+                    <h1 class="text-3xl font-bold" id="font1">JSON Tree Viewer</h1>
+                </div>
+                <div class="mt-1">
+                    <p id="font2">Simple JSON Viewer that runs completely on-client. No data exchange </p>
+                </div>
+                <div class="mt-3">
+                    <div class="flex justify-center">
+                        <p><input type="file" id="fileInput" accept=".json"></p>
+                    </div>
+                </div>
+                <div class="mt-3">
+                    <p id="error">Invalid file. Please load a valid JSON file.</p>
+                </div>
+            
+            <pre id="jsonOutput"><div></div></pre>
         </div>
+    
 
-        <pre id="jsonOutput"><div></div></pre>
-    </div>
     <div id="container">
+        <h1 id="selectedFileName">Filename</h1>
+
         <ul id="recordList">
             <!-- Records -->
         </ul>
@@ -138,6 +65,24 @@
             showRecords();
         }
 
+
+        function findDuplicateFields(jsonData) {
+            const duplicateFields = {};
+            function findDuplicates(obj) {
+                for (const key in obj) {
+                    if (typeof obj[key] === 'object') {
+                        findDuplicates(obj[key]);
+                    } else {
+                        if (!duplicateFields[key]) {
+                            duplicateFields[key] = [];
+                        }
+                        //duplicateFields[key].push(obj[key]);
+                    }
+                }
+            }
+            findDuplicates(jsonData);
+            return duplicateFields;
+        }
 
 
         function getLevels(json, nivelAtual = 1) {
@@ -172,10 +117,21 @@
             try {
                 // Get levels is possible? Do this;
                 data = JSON.parse(records[0]);
+                
+                /*
+                levels
                 const niveis = getLevels(data);
                 for (let i = 0; i < niveis.length; i++) {
                     console.log(`${i}\t${niveis[i]}`);
                 }
+                */
+
+                // Duplicated fields?
+                /*
+                const duplicateFields = findDuplicateFields(data);
+                console.log(duplicateFields);
+                */
+
                 return
             }
             catch
@@ -183,6 +139,10 @@
 
             }
 
+
+            return;
+
+            /* Map fields */
             level = 0;
             console.log('Map **ini**');
             dataMap = [];
@@ -276,6 +236,12 @@
             formError.style.display = "block";
         }
 
+        function setFileName(filename){
+            const selectedFileName = document.getElementById('selectedFileName');
+            selectedFileName.textContent = filename;
+            selectedFileName.style = 'display:block;';
+        }
+
         // Função para exibir os registros
         function showRecords() {
             if (records.length <= 0) {
@@ -284,7 +250,7 @@
             }
             console.log(records.length);
             if (records.length > 0) {
-                prepareDataMap(dataStr);
+                //prepareDataMap(dataStr);
             }
             // Limpa os registros anteriores
             recordList.innerHTML = '';
@@ -296,10 +262,57 @@
                 }
 
                 const record = records[i];
-                const listItem = document.createElement('pre');
-                jsonStringFormatado = JSON.stringify(records[i], null, 2);
-                listItem.textContent = record;
-                recordList.appendChild(listItem);
+                const listItem = document.createElement('div');
+                linesString = lines(records[i]);
+                //console.log('lines:' + linesString.length);
+                for (idxLine=0; idxLine < linesString.length; idxLine++) {
+                    /*const paragraph = document.createElement('div');
+                    paragraph.textContent = linesString[idxLine];
+                    recordList.appendChild(paragraph);
+                    */
+                    const paragraph = document.createElement('div');
+                    paragraph.classList = ['flex'];
+
+                    // 1) Div para espaçamento à esquerda
+                    const leftSpacer = document.createElement('div');
+                    leftSpacer.classList = ['left-spacer col-md-1 ml-10']; // Adicione uma classe CSS se desejar
+                    leftSpacer.style = 'left:12px';
+                    paragraph.appendChild(leftSpacer);
+
+                    itemKey = "";
+                    if ( linesString[idxLine].indexOf('"')>=0) {
+                        itemKey = linesString[idxLine];
+                        itemKey = itemKey.substring(itemKey.indexOf('"')+1);
+                        itemKey = itemKey.substring(0,itemKey.indexOf('"'));
+                    }
+                    
+                    itemData = linesString[idxLine];
+                    if ( linesString[idxLine].indexOf('"')>=0) {
+                        if ( linesString[idxLine].indexOf(':')>0) {
+                            itemData = itemData.substring(itemData.indexOf(':')+1);
+                        }
+                    }
+
+                    // 2) Div para conter uma chave
+                    const keyDiv = document.createElement('div');
+                    keyDiv.className = 'accentText'; // Adicione uma classe CSS se desejar
+                    keyDiv.textContent = itemKey; // Adicione o texto da chave
+                    keyDiv.classList = ['accentText col-md-6 ml-30'];
+                    paragraph.appendChild(keyDiv);
+
+                    // 3) Div para conter o dado relacionado à chave
+                    const dataDiv = document.createElement('div');
+                    dataDiv.className = 'data'; // Adicione uma classe CSS se desejar
+                    dataDiv.textContent = itemData; // Adicione o texto do dado
+                    paragraph.appendChild(dataDiv);
+
+                    recordList.appendChild(paragraph);
+
+                }
+                //listItem.textContent = record;
+                //recordList.appendChild(listItem);
+
+
             }
 
             if (currentIndex < (records.length - recordsToShow)) {
@@ -316,10 +329,12 @@
             const file = event.target.files[0];
             let i = 0;
 
+            setFileName(file.name);
+
             if (file) {
                 console.log("Starting App...");
 
-                const rangeSize = 1048576; //1048576=1mb //8192;
+                const rangeSize = 104857;  //1048576=1mb //8192;
 
                 let offset = 0;
                 dataStr = [];
@@ -339,7 +354,12 @@
                         const textChunk = document.createElement('p');
                         textChunk.textContent = new TextDecoder().decode(data);
                         //console.log(textChunk);
-                        dataStr.push(textChunk.textContent);
+                        text = textChunk.textContent;
+                        text = breakLinesInJSON(text);
+                        text = removeEmptyLines(text);
+                        text = unifyCommaWithPreviousLine(text);
+                        //console.log(text);
+                        dataStr.push(text);
                         if (dataStr.length == 1) {
                             loadRecords(dataStr);
                         }
@@ -362,8 +382,8 @@
 
                 readNextRange();
             }
-            console.log("End App.");
-            console.log(dataStr);
+            //console.log("End App.");
+            //console.log(dataStr);
             loadRecords(dataStr);
             ocultarFormBox();
 
@@ -448,6 +468,50 @@
             }
 
         });
+
+        
+        function breakLinesInJSON(jsonString) {
+            // Use expressão regular para encontrar vírgulas,
+            // chaves, colchetes
+            const regex = /[,{}[\]]/g;
+  
+            let result = '';
+            let lastIndex = 0;
+            let match;
+            
+            while ((match = regex.exec(jsonString)) !== null) {
+                const index = match.index;
+                result += jsonString.substring(lastIndex, index + 1) + '\n';
+                lastIndex = index + 1;
+            }
+            
+            result += jsonString.substring(lastIndex); // Adiciona o restante da string
+            
+            return result;
+        }
+
+        function removeEmptyLines(inputString) {
+            return inputString.replace(/^\s*\n/gm, '');
+        }
+
+        function unifyCommaWithPreviousLine(inputString) {
+            const lines = inputString.split('\n');
+            const resultLines = [];
+            for (let i = 0; i < lines.length; i++) {
+                if (lines[i].trim() === ',' && i > 0) {
+                // Unifica com a linha anterior
+                resultLines[resultLines.length - 1] += ',';
+                } else {
+                resultLines.push(lines[i]);
+                }
+            }
+            return resultLines.join('\n');
+        }
+
+        function lines(inputString) {
+            const lines = inputString.split('\n');
+            return lines;
+        }
 
     </script>
 </body>
