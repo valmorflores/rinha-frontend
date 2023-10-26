@@ -38,6 +38,7 @@ dependencies:
   file_picker: ^6.0.0
   get: ^4.6.6
   google_fonts: ^6.1.0
+  flutter_simple_treeview: ^3.0.2
 
 dev_dependencies:
   flutter_test:

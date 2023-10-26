@@ -6,6 +6,7 @@ import 'dart:typed_data';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:file_picker/file_picker.dart';
+import 'package:flutter_simple_treeview/flutter_simple_treeview.dart';
 import 'package:get/get.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:rinhadefrontend/controller/json_controller.dart';
@@ -36,6 +37,10 @@ class MyHomePage extends StatefulWidget {
 }
 
 class _MyHomePageState extends State<MyHomePage> {
+  final TreeController _treeController =
+      TreeController(allNodesExpanded: false);
+  bool isUsingTreeNode = true;
+  late bool usingTreeNode;
   List<String> fileContent = [];
   bool isSelectedFile = false;
   bool isInvalid = false;
@@ -77,6 +82,11 @@ class _MyHomePageState extends State<MyHomePage> {
           text = jsonFormat(text);
           List<String> lines = LineSplitter.split(text).toList();
           lines.removeWhere((element) => element.trim() == '');
+          if (lines.length > 10000) {
+            usingTreeNode = false;
+          } else {
+            usingTreeNode = isUsingTreeNode;
+          }
           setState(() {
             fileContent = lines;
             isSelectedFile = true;
@@ -87,10 +97,51 @@ class _MyHomePageState extends State<MyHomePage> {
   }
 
   @override
+  void initState() {
+    // TODO: implement initState
+    super.initState();
+    usingTreeNode = isUsingTreeNode;
+  }
+
+  @override
   Widget build(BuildContext context) {
     if (!isSelectedFile) {
       return Scaffold(
           body: FileSelectorPage(isValid: !isInvalid, onPressed: _openFile));
+    } else if (usingTreeNode) {
+      return Scaffold(
+          appBar: AppBar(
+            leading: InkWell(
+              child: Icon(
+                Icons.arrow_back,
+              ),
+              onTap: () {
+                setState(() {
+                  isSelectedFile = false;
+                });
+              },
+            ),
+          ),
+          body: SingleChildScrollView(
+            child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: <Widget>[
+                  Row(children: [
+                    Container(
+                      width: 100,
+                    ),
+                    Text('${jsonController.getSelectedFileName()}',
+                        style: GoogleFonts.inter(
+                            fontWeight: FontWeight.w700, fontSize: 32)),
+                  ]),
+                  Row(children: [
+                    Container(
+                      width: 100,
+                    ),
+                    buildTree(),
+                  ]),
+                ]),
+          ));
     } else {
       return Scaffold(
         appBar: AppBar(
@@ -188,5 +239,61 @@ class _MyHomePageState extends State<MyHomePage> {
       return text;
     }
     return jsonController.format(text);
+  }
+
+  /// Builds tree or error message out of the entered content.
+  Widget buildTree() {
+    try {
+      var parsedJson = jsonController.getJsonData();
+      return TreeView(
+        nodes: toTreeNodes(parsedJson),
+        treeController: _treeController,
+      );
+    } on FormatException catch (e) {
+      return Text(e.message);
+    }
+  }
+
+  List<TreeNode> toTreeNodes(dynamic parsedJson) {
+    if (parsedJson is Map<String, dynamic>) {
+      return parsedJson.keys
+          .map((k) => TreeNode(
+              content: Text('$k:'), children: toTreeNodes(parsedJson[k])))
+          .toList();
+    }
+    if (parsedJson is List<dynamic>) {
+      if (parsedJson.length == 1) {
+        // Se a lista tiver apenas um elemento, retorne o conteúdo diretamente.
+        return [TreeNode(content: Text('---' + parsedJson[0].toString()))];
+      } else {
+        return parsedJson
+            .asMap()
+            .map((i, element) => MapEntry(
+                i,
+                TreeNode(
+                    content: Text('[$i]:'), children: toTreeNodes(element))))
+            .values
+            .toList();
+      }
+    }
+    return [TreeNode(content: Text(parsedJson.toString()))];
+  }
+
+  List<TreeNode> toTreeNodes2(dynamic parsedJson) {
+    if (parsedJson is Map<String, dynamic>) {
+      return parsedJson.keys
+          .map((k) => TreeNode(
+              content: Text('$k:'), children: toTreeNodes(parsedJson[k])))
+          .toList();
+    }
+    if (parsedJson is List<dynamic>) {
+      return parsedJson
+          .asMap()
+          .map((i, element) => MapEntry(i,
+              TreeNode(content: Text('[$i]:'), children: toTreeNodes(element))))
+          .values
+          .toList();
+    }
+    return [TreeNode(content: Text(parsedJson.toString()))];
   }
 }
