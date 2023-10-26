@@ -262,19 +262,14 @@ class _MyHomePageState extends State<MyHomePage> {
           .toList();
     }
     if (parsedJson is List<dynamic>) {
-      if (parsedJson.length == 1) {
-        // Se a lista tiver apenas um elemento, retorne o conteúdo diretamente.
-        return [TreeNode(content: Text('---' + parsedJson[0].toString()))];
-      } else {
-        return parsedJson
-            .asMap()
-            .map((i, element) => MapEntry(
-                i,
-                TreeNode(
-                    content: Text('[$i]:'), children: toTreeNodes(element))))
-            .values
-            .toList();
-      }
+      // Se a lista tiver apenas um elemento, retorne o conteúdo diretamente.
+      //return [TreeNode(content: Text(parsedJson[0].toString()))];
+      return parsedJson
+          .asMap()
+          .map((i, element) => MapEntry(i,
+              TreeNode(content: Text('[$i]:'), children: toTreeNodes(element))))
+          .values
+          .toList();
     }
     return [TreeNode(content: Text(parsedJson.toString()))];
   }
