@@ -28,10 +28,13 @@ class _FileSelectorPageState extends State<FileSelectorPage> {
                     fontWeight: FontWeight.w700, fontSize: 48)),
           ],
         ),
-        Text(
-            'Simple JSON Viewer that runs completely on-client. No data exchange',
-            style:
-                GoogleFonts.inter(fontWeight: FontWeight.w400, fontSize: 24)),
+        Padding(
+          padding: const EdgeInsets.fromLTRB(0,15,0,15),
+          child: Text(
+              'Simple JSON Viewer that runs completely on-client. No data exchange',
+              style:
+                  GoogleFonts.inter(fontWeight: FontWeight.w400, fontSize: 24)),
+        ),
         Padding(
           padding: const EdgeInsets.all(8.0),
           child: Center(
