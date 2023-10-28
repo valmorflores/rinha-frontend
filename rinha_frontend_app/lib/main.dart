@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:rinhadefrontend/controller/application_controller.dart';
+import 'constants/design_colors.dart';
 import 'pages/home_page.dart';
 
 void main() {
@@ -15,8 +16,7 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MaterialApp(
       theme: ThemeData(
-        primaryColor: Colors.white,
-        colorScheme: ColorScheme.light().copyWith(primary: Colors.black),
+        colorScheme: ColorScheme.light().copyWith(primary: DesignColors.gradientStart, ),
       ),
       debugShowCheckedModeBanner: false,
       home: SelectionArea(child: MyHomePage()),

@@ -4,6 +4,7 @@ import 'package:get/get.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:rinhadefrontend/constants/enum_stage.dart';
 
+import '../constants/design_colors.dart';
 import '../controller/application_controller.dart';
 import '../controller/json_controller.dart';
 
@@ -19,6 +20,7 @@ class DisplayNormalFiles extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
         appBar: AppBar(
+          elevation: 0,
           leading: InkWell(
             child: Icon(
               Icons.arrow_back,
@@ -69,7 +71,7 @@ class DisplayNormalFiles extends StatelessWidget {
     if (parsedJson is Map<String, dynamic>) {
       return parsedJson.keys
           .map((k) => TreeNode(
-              content: Text('$k:', style: TextStyle(color: Colors.blueAccent)),
+              content: Text('$k:', style: TextStyle(color: DesignColors.accent)),
               children: toTreeNodes(parsedJson[k])))
           .toList();
     }
@@ -82,7 +84,7 @@ class DisplayNormalFiles extends StatelessWidget {
               i,
               TreeNode(
                   content:
-                      Text('[$i]:', style: TextStyle(color: Colors.blueAccent)),
+                      Text('[$i]:', style: TextStyle(color: DesignColors.accent)),
                   children: toTreeNodes(element))))
           .values
           .toList();

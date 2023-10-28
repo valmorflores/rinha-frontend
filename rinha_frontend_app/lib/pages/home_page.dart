@@ -75,7 +75,7 @@ class _MyHomePageState extends State<MyHomePage> {
           } else {
             text = jsonFormat(text);
           }
-          print(text.substring(0, text.length > 20000 ? 20000 : text.length));
+          // print(text.substring(0, text.length > 20000 ? 20000 : text.length));
           List<String> lines = LineSplitter.split(text).toList();
           lines.removeWhere((element) => element.trim() == '');
           if (lines.length > 10000) {
@@ -83,9 +83,11 @@ class _MyHomePageState extends State<MyHomePage> {
           } else {
             usingTreeNode = isUsingTreeNode;
           }
-          applicationController.setStage(StepStage.displayData);
-          jsonController.setFileContent(lines);
-          applicationController.setSelectedFile(true);
+          setState(() {
+            applicationController.setStage(StepStage.displayData);
+            jsonController.setFileContent(lines);
+            applicationController.setSelectedFile(true);
+          }); 
         }
       }
     }

@@ -1,6 +1,7 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:rinhadefrontend/constants/design_colors.dart';
 
 class FileSelectorPage extends StatefulWidget {
   bool isValid;
@@ -33,9 +34,23 @@ class _FileSelectorPageState extends State<FileSelectorPage> {
                 GoogleFonts.inter(fontWeight: FontWeight.w400, fontSize: 24)),
         Padding(
           padding: const EdgeInsets.all(8.0),
-          child: ElevatedButton(
-            onPressed: (() => widget.onPressed()),
-            child: Text('Selecionar Arquivo'),
+          child: Center(
+            child: ElevatedButton(
+               style: ElevatedButton.styleFrom(
+              
+            ),
+              onPressed: (() => widget.onPressed()),
+              child: Container(
+                width: 100,
+                height: 40,
+                child: Center(
+                    child: Text('Load JSON',
+                        style: TextStyle(color: Colors.black))),
+                decoration: BoxDecoration(
+                  ),
+                ),
+              ),
+          
           ),
         ),
         Visibility(

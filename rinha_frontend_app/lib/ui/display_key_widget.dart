@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:rinhadefrontend/constants/design_colors.dart';
 
 class DisplayKeyWidget extends StatelessWidget {
   String keyName;
@@ -8,7 +9,7 @@ class DisplayKeyWidget extends StatelessWidget {
   Widget build(BuildContext context) {
     return Text(
       '$keyName',
-      style: TextStyle(color: Colors.blueAccent),
+      style: const TextStyle(color: DesignColors.accent),
     );
   }
 }

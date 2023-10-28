@@ -26,6 +26,7 @@ class _DisplayBigFilesState extends State<DisplayBigFiles> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
+        elevation: 0, 
         leading: InkWell(
           child: Icon(
             Icons.arrow_back,
