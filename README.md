@@ -1,7 +1,10 @@
 # rinha-frontend
 Rinha frontend
 
-# Deploy
+# Deploy, versão flutter: (requer melhorias)
+https://valmorflores.github.io/rinha-frontend/rinhaapp
+
+# Deploy, versão javascript (em desenvolvimento, basico)
 https://valmorflores.github.io/rinha-frontend/
 
 # Etapas
