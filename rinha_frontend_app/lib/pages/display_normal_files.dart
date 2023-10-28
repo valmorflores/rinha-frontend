@@ -3,25 +3,42 @@ import 'package:flutter_simple_treeview/flutter_simple_treeview.dart';
 import 'package:get/get.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:rinhadefrontend/constants/enum_stage.dart';
+import 'package:rinhadefrontend/pages/help.dart';
 
 import '../constants/design_colors.dart';
 import '../controller/application_controller.dart';
 import '../controller/json_controller.dart';
+import 'about.dart';
 
-class DisplayNormalFiles extends StatelessWidget {
+class DisplayNormalFiles extends StatefulWidget {
+  const DisplayNormalFiles({super.key});
+
+  @override
+  State<DisplayNormalFiles> createState() => _DisplayNormalFilesState();
+}
+
+class _DisplayNormalFilesState extends State<DisplayNormalFiles> {
   ApplicationController applicationController =
       Get.put(ApplicationController());
   JsonController jsonController = Get.put(JsonController());
   final TreeController _treeController = TreeController(allNodesExpanded: true);
 
-  DisplayNormalFiles({super.key});
+  String _message = 'Basic state';
+
+  void updateState(String newMessage) {
+    setState(() {
+      _message = newMessage;
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+        drawer: MenuDrawer(
+            treeController: _treeController, updateMessage: updateState),
         appBar: AppBar(
           elevation: 0,
-          leading: InkWell(
+          /*leading: InkWell(
             child: Icon(
               Icons.arrow_back,
             ),
@@ -30,7 +47,7 @@ class DisplayNormalFiles extends StatelessWidget {
               applicationController.setStage(StepStage.start);
               jsonController.setFileContent([]);
             },
-          ),
+          ),*/
         ),
         body: SingleChildScrollView(
           child: Column(
@@ -71,7 +88,8 @@ class DisplayNormalFiles extends StatelessWidget {
     if (parsedJson is Map<String, dynamic>) {
       return parsedJson.keys
           .map((k) => TreeNode(
-              content: Text('$k:', style: TextStyle(color: DesignColors.accent)),
+              content:
+                  Text('$k:', style: TextStyle(color: DesignColors.accent)),
               children: toTreeNodes(parsedJson[k])))
           .toList();
     }
@@ -83,12 +101,101 @@ class DisplayNormalFiles extends StatelessWidget {
           .map((i, element) => MapEntry(
               i,
               TreeNode(
-                  content:
-                      Text('[$i]:', style: TextStyle(color: DesignColors.accent)),
+                  content: Text('[$i]:',
+                      style: TextStyle(color: DesignColors.accent)),
                   children: toTreeNodes(element))))
           .values
           .toList();
     }
     return [TreeNode(content: Text(parsedJson.toString()))];
+  }
+}
+
+class MenuDrawer extends StatelessWidget {
+  final Function(String) updateMessage;
+  TreeController treeController;
+  MenuDrawer(
+      {required this.treeController, required this.updateMessage, super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return Drawer(
+      child: ListView(
+        padding: EdgeInsets.zero,
+        children: <Widget>[
+          DrawerHeader(
+              decoration: BoxDecoration(
+                color: Colors.black,
+              ),
+              child: Column(
+                children: [
+                  Text(
+                    'JSON Viewer',
+                    style: TextStyle(
+                      color: Colors.white,
+                      fontSize: 24,
+                    ),
+                  ),
+                  SizedBox(
+                    height: 20,
+                  ),
+                  Text(
+                    'Rinha de frontend',
+                    style: TextStyle(
+                      color: Colors.white,
+                      fontSize: 12,
+                    ),
+                  ),
+                  Text(
+                    'by Valmor Flores',
+                    style: TextStyle(
+                      color: Colors.white,
+                      fontSize: 12,
+                    ),
+                  ),
+                ],
+              )),
+          ListTile(
+            leading: Icon(Icons.add),
+            title: Text('Expand all'),
+            onTap: () {
+              treeController.expandAll();
+              updateMessage('Do update now');
+              Navigator.pop(context);
+            },
+          ),
+          ListTile(
+            leading: Icon(Icons.remove),
+            title: Text('Colapse all'),
+            onTap: () {
+              treeController.collapseAll();
+              updateMessage('Do update now');
+              Navigator.pop(context);
+            },
+          ),
+          ListTile(
+            leading: Icon(Icons.help),
+            title: Text('Help'),
+            onTap: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(builder: (context) => Help()),
+              );
+              
+            },
+          ),
+          ListTile(
+            leading: Icon(Icons.info),
+            title: Text('About'),
+            onTap: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(builder: (context) => About()),
+              );
+            },
+          ),
+        ],
+      ),
+    );
   }
 }
