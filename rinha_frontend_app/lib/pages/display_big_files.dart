@@ -10,8 +10,7 @@ import '../ui/root_key_widget.dart';
 import '../ui/root_point_widget.dart';
 
 class DisplayBigFiles extends StatefulWidget {
-  BuildContext context;
-  DisplayBigFiles({required this.context, super.key});
+  DisplayBigFiles({super.key});
 
   @override
   State<DisplayBigFiles> createState() => _DisplayBigFilesState();
@@ -24,9 +23,10 @@ class _DisplayBigFilesState extends State<DisplayBigFiles> {
 
   @override
   Widget build(BuildContext context) {
+    var strData = jsonController.getFileContent();
     return Scaffold(
       appBar: AppBar(
-        elevation: 0, 
+        elevation: 0,
         leading: InkWell(
           child: Icon(
             Icons.arrow_back,

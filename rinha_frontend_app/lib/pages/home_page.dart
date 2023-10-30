@@ -39,6 +39,7 @@ class _MyHomePageState extends State<MyHomePage> {
         onFileLoading: ((p0) {
           setState(() {
             applicationController.setStage(StepStage.loadingFile);
+            debugPrint('Carregando arquivo...');
           });
         }));
 
@@ -46,10 +47,12 @@ class _MyHomePageState extends State<MyHomePage> {
       String text = '';
       // Web
       if (kIsWeb) {
+        debugPrint('[WEB] Lendo arquivo...');
         Uint8List? bytes = result.files.single.bytes;
         text = utf8.decode(bytes!);
         // SO normal
       } else {
+        debugPrint('[Desktop] Lendo arquivo...');
         String? filePath = result.files.single.path;
         if (filePath != null) {
           final file = await File(filePath);
@@ -57,8 +60,8 @@ class _MyHomePageState extends State<MyHomePage> {
           text = utf8.decode(bytes);
         }
       }
+      debugPrint('Iniciando validação de arquivo...');
       jsonController.setSelectedFileName(result.files.first.name);
-
       if (text != null) {
         if (!jsonValid(text)) {
           setState(() {
@@ -71,23 +74,33 @@ class _MyHomePageState extends State<MyHomePage> {
           isInvalid = false;
           // Giant problem, alternative way
           if (text.length > 1000000) {
+            debugPrint('Arquivo grande, forçando quebra de linhas...');
             text = jsonController.forceBreakLine(text);
           } else {
+            debugPrint('Arquivo pequeno, formatando em modo texto...');
             text = jsonFormat(text);
           }
+          debugPrint(
+              'Validação secundária, assegurar a integridade do arquivo...');
+          jsonValid(text);
+          //
           // print(text.substring(0, text.length > 20000 ? 20000 : text.length));
+          debugPrint('Criando um stringList, [melhorar isso]...');
           List<String> lines = LineSplitter.split(text).toList();
           lines.removeWhere((element) => element.trim() == '');
-          if (lines.length > 10000) {
+          if (lines.length > 5000) {
+            debugPrint('Usando modo textual...');
             usingTreeNode = false;
           } else {
+            debugPrint('Usando modo árvore...');
             usingTreeNode = isUsingTreeNode;
           }
           setState(() {
             applicationController.setStage(StepStage.displayData);
             jsonController.setFileContent(lines);
             applicationController.setSelectedFile(true);
-          }); 
+            debugPrint('Camada de exibição...');
+          });
         }
       }
     }
@@ -100,24 +113,46 @@ class _MyHomePageState extends State<MyHomePage> {
     usingTreeNode = isUsingTreeNode;
   }
 
+  Future<void> _openBigFile(BuildContext context) async {
+    await Navigator.of(context).push(
+      MaterialPageRoute(
+        builder: (context) {
+          return DisplayBigFiles();
+        },
+      ),
+    );
+  }
+
+  Future<void> _openNormalFile(BuildContext context) async {
+    await Navigator.of(context).push(
+      MaterialPageRoute(
+        builder: (context) {
+          return DisplayNormalFiles();
+        },
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
+    // Display Data Stage?
+    if (applicationController.getStage() == StepStage.displayData) {
+      if (usingTreeNode) {
+        WidgetsBinding.instance.addPostFrameCallback((_) {
+          _openNormalFile(context);
+        });
+      } else {
+        WidgetsBinding.instance.addPostFrameCallback((_) {
+          _openBigFile(context);
+        });
+      }
+    }
     if (applicationController.getStage() == StepStage.loadingFile) {
       return DisplayLoadingPage();
     }
-    if (!applicationController.isSelectedFile()) {
-      applicationController.setStage(StepStage.start);
-      return Scaffold(
-          body: FileSelectorPage(isValid: !isInvalid, onPressed: _openFile));
-    } else if (usingTreeNode) {
-      /*Navigator.push(
-        context,
-        MaterialPageRoute(builder: (context) => DisplayNormalFiles()),
-      );*/
-      return DisplayNormalFiles();
-    } else {
-      return DisplayBigFiles(context: context);
-    }
+    applicationController.setStage(StepStage.start);
+    return Scaffold(
+        body: FileSelectorPage(isValid: !isInvalid, onPressed: _openFile));
   }
 
   bool jsonValid(String text) {

@@ -31,6 +31,10 @@ class JsonController extends GetxController {
   }
 
   String format(String text) {
+    if (text.length > 100000) {
+      debugPrint('Formatando um json parcial');
+      return fixAndFormatJson(text);
+    }
     try {
       debugPrint('Iniciando formatação, decodificando');
       var j = json.decode(text);
@@ -72,6 +76,7 @@ class JsonController extends GetxController {
   }
 
   forceBreakLine(String text) {
+    return format(text);
     String str = text.replaceAll('",', '",\n');
     str = str.replaceAll(',"', ',\n"');
     str = str.replaceAll(', "', ',\n"');
@@ -142,5 +147,92 @@ class JsonController extends GetxController {
 
     // Retorne a lista elementosFilhos.
     return elementosFilhos;
+  }
+
+  String fixAndFormatJson(String jsonString) {
+    const int maxLength = 10000; //100000
+
+    if (jsonString.length > maxLength) {
+      // Encontra o último caractere válido ("," ou "]" ou "}")
+      int lastValidCharIndex =
+          jsonString.lastIndexOf(RegExp(r'[,\]\}]'), maxLength);
+
+      if (lastValidCharIndex == -1) {
+        // Caso não haja um caractere válido para fechamento,
+        // retorne uma string vazia ou um erro, conforme necessário.
+        //return '';
+      }
+
+      jsonString = jsonString.substring(0, lastValidCharIndex + 1);
+    }
+
+    // Verifica se o JSON é válido
+    try {
+      json.decode(jsonString);
+    } catch (e) {
+      // Se o JSON não for válido, tente corrigir acrescentando fechamentos
+      if (jsonString[jsonString.length - 1] == ',') {
+        jsonString = jsonString.substring(0, jsonString.length - 1);
+      } else {
+        jsonString = extractAtLastComma(jsonString);
+        jsonString = jsonString.substring(0, jsonString.length - 1);
+      }
+
+      jsonString = jsonString + _addClosingBrackets(jsonString);
+    }
+
+    debugPrint('String file parcial construida');
+    return jsonString;
+  }
+
+  String _addClosingBrackets(String jsonString) {
+    int openBraces = 0;
+    int openBrackets = 0;
+    int level = 0;
+    String compositionStr = '';
+
+    for (int i = 0; i < jsonString.length; i++) {
+      if (jsonString[i] == '{') {
+        level++;
+        compositionStr = compositionStr + '{';
+      } else if (jsonString[i] == '}') {
+        level--;
+        compositionStr = compositionStr.substring(0, compositionStr.length - 1);
+      } else if (jsonString[i] == '[') {
+        level++;
+        compositionStr = compositionStr + '[';
+      } else if (jsonString[i] == ']') {
+        level--;
+        compositionStr = compositionStr.substring(0, compositionStr.length - 1);
+      }
+    }
+
+    compositionStr = compositionStr.replaceAll('[', ']');
+    compositionStr = compositionStr.replaceAll('{', '}');
+    compositionStr = reverseString(compositionStr);
+    String closingBrackets = compositionStr;
+    return closingBrackets;
+  }
+
+  String extractAtLastComma(String input) {
+    int lastCommaIndex = input.lastIndexOf(',');
+    if (lastCommaIndex != -1) {
+      return input.substring(0, lastCommaIndex + 1);
+    } else {
+      return input;
+    }
+  }
+
+  String reverseString(String input) {
+    // Divide a string em uma lista de caracteres, inverte-a e, em seguida, a converte de volta para uma string.
+    return input.split('').reversed.join();
+  }
+
+  void main() {
+    String jsonString = '...'; // Sua string JSON aqui
+
+    String fixedAndFormattedJson = fixAndFormatJson(jsonString);
+
+    print(fixedAndFormattedJson);
   }
 }
