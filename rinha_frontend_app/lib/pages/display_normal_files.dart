@@ -157,17 +157,7 @@ class MenuDrawer extends StatelessWidget {
               )),
           ListTile(
             leading: Icon(Icons.add),
-            title: Text('Sair e carregar outro'),
-            onTap: () {
-              //treeController.expandAll();
-              updateMessage('Do update now');
-              Navigator.pop(context);
-              Navigator.pop(context);
-            },
-          ),
-          ListTile(
-            leading: Icon(Icons.add),
-            title: Text('Expand all'),
+            title: Text('Expandir todos'),
             onTap: () {
               treeController.expandAll();
               updateMessage('Do update now');
@@ -176,7 +166,7 @@ class MenuDrawer extends StatelessWidget {
           ),
           ListTile(
             leading: Icon(Icons.remove),
-            title: Text('Colapse all'),
+            title: Text('Retrair todos'),
             onTap: () {
               treeController.collapseAll();
               updateMessage('Do update now');
@@ -185,7 +175,7 @@ class MenuDrawer extends StatelessWidget {
           ),
           ListTile(
             leading: Icon(Icons.help),
-            title: Text('Help'),
+            title: Text('Ajuda'),
             onTap: () {
               Navigator.push(
                 context,
@@ -195,12 +185,22 @@ class MenuDrawer extends StatelessWidget {
           ),
           ListTile(
             leading: Icon(Icons.info),
-            title: Text('About'),
+            title: Text('Sobre'),
             onTap: () {
               Navigator.push(
                 context,
                 MaterialPageRoute(builder: (context) => About()),
               );
+            },
+          ),
+          ListTile(
+            leading: Icon(Icons.close),
+            title: Text('Sair'),
+            onTap: () {
+              //treeController.expandAll();
+              updateMessage('Refresh');
+              Navigator.pop(context);
+              Navigator.pop(context);
             },
           ),
         ],
