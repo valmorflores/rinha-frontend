@@ -63,7 +63,8 @@ class _MyHomePageState extends State<MyHomePage> {
       debugPrint('Iniciando validação de arquivo...');
       jsonController.setSelectedFileName(result.files.first.name);
       if (text != null) {
-        if (!jsonValid(text)) {
+        bool arrayJson = jsonController.isJsonArray(text);
+        if (!jsonValid(text) && !arrayJson) {
           setState(() {
             jsonController.setFileContent([]);
             applicationController.setSelectedFile(false);
@@ -156,11 +157,12 @@ class _MyHomePageState extends State<MyHomePage> {
   }
 
   bool jsonValid(String text) {
-    if (text.length > 10000) {
+    /*if (text.length > 10000) {
       return true;
-    }
+    }*/
     return jsonController.isValid(text);
   }
+
 
   String jsonFormat(String text) {
     if (text.length > 1000000000) {

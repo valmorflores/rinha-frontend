@@ -157,6 +157,16 @@ class MenuDrawer extends StatelessWidget {
               )),
           ListTile(
             leading: Icon(Icons.add),
+            title: Text('Sair e carregar outro'),
+            onTap: () {
+              //treeController.expandAll();
+              updateMessage('Do update now');
+              Navigator.pop(context);
+              Navigator.pop(context);
+            },
+          ),
+          ListTile(
+            leading: Icon(Icons.add),
             title: Text('Expand all'),
             onTap: () {
               treeController.expandAll();
@@ -181,7 +191,6 @@ class MenuDrawer extends StatelessWidget {
                 context,
                 MaterialPageRoute(builder: (context) => Help()),
               );
-              
             },
           ),
           ListTile(

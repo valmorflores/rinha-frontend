@@ -30,6 +30,13 @@ class JsonController extends GetxController {
     return false;
   }
 
+  bool isJsonArray(String text) {
+    if (text.trim().substring(0, 1) == '[') {
+      return true;
+    }
+    return false;
+  }
+
   String format(String text) {
     if (text.length > 100000) {
       debugPrint('Formatando um json parcial');
@@ -181,8 +188,41 @@ class JsonController extends GetxController {
       jsonString = jsonString + _addClosingBrackets(jsonString);
     }
 
+    // Start Array, remove array´s info
+
+    if (jsonString.trim().substring(0, 1) == '[') {
+      jsonString = '{ "0" : ' + jsonString + '}';
+    }
+
     debugPrint('String file parcial construida');
     return jsonString;
+  }
+
+  void processDynamicJson(String jsonString) {
+    // Converter a string JSON em um mapa dinâmico
+    Map<String, dynamic> jsonData = json.decode(jsonString);
+
+    // Iterar sobre as chaves e valores do mapa
+    jsonData.forEach((key, value) {
+      print("Key: $key");
+
+      if (value is Map) {
+        // mapa? iterar
+        Map<String, dynamic> subMap = {key: value};
+        subMap.forEach((subKey, subValue) {
+          print("  Sub Key: $subKey, Sub Value: $subValue");
+        });
+      } else if (value is List) {
+        // Se o valor for uma lista, você pode iterar sobre os elementos da lista
+        List<dynamic> list = value;
+        list.forEach((item) {
+          print("  List Item: $item");
+        });
+      } else {
+        // Valor simples
+        print("Value: $value");
+      }
+    });
   }
 
   String _addClosingBrackets(String jsonString) {
