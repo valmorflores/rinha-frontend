@@ -49,7 +49,8 @@ class _DisplayNormalFilesState extends State<DisplayNormalFiles> {
             },
           ),*/
         ),
-        body: SingleChildScrollView(
+        body: SelectionArea(
+            child: SingleChildScrollView(
           child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
               children: <Widget>[
@@ -68,7 +69,7 @@ class _DisplayNormalFilesState extends State<DisplayNormalFiles> {
                   buildTree(),
                 ]),
               ]),
-        ));
+        )));
   }
 
   /// Builds tree or error message out of the entered content.
